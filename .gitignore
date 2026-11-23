@@ -1,0 +1,4 @@
+watchdog
+worker
+src/*.o
+watchdog.log
