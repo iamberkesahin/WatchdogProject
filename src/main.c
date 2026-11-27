@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
     printf("watchdog running (PID: %d). Log file: %s\n", (int)getpid(), log_path);
     fflush(stdout);
 
-    if (supervisor_start_all() == 0) {
+    if (supervisor_start_all() == 0 && !g_shutdown_flag) {
         log_write("ERROR", "no worker processes could be started");
         log_close();
         return 1;
@@ -126,18 +126,24 @@ int main(int argc, char *argv[]) {
         if (!g_shutdown_flag && !g_child_flag && !g_status_flag && !g_alarm_flag) {
             sigsuspend(&orig_set);
         }
+        int child_event = g_child_flag;
+        int status_event = g_status_flag;
+        int timer_event = g_alarm_flag;
+        g_child_flag = 0;
+        g_status_flag = 0;
+        g_alarm_flag = 0;
         sigprocmask(SIG_SETMASK, &orig_set, NULL);
 
-        if (g_child_flag) {
-            g_child_flag = 0;
+        if (g_shutdown_flag) {
+            break;
+        }
+        if (child_event) {
             supervisor_handle_children(1);
         }
-        if (g_status_flag) {
-            g_status_flag = 0;
+        if (status_event) {
             supervisor_report_status();
         }
-        if (g_alarm_flag) {
-            g_alarm_flag = 0;
+        if (timer_event) {
             supervisor_periodic_check();
         }
     }

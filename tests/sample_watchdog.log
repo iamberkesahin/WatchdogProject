@@ -1,20 +1,20 @@
-[2026-11-23 16:59:41] [INIT    ] watchdog started (pid=10149, log=tests/sample_watchdog.log)
-[2026-11-23 16:59:41] [START   ] worker=w-daemon1 pid=10151 mode=daemon restarts=0
-[2026-11-23 16:59:41] [START   ] worker=w-normal pid=10152 mode=normal restarts=0
-[2026-11-23 16:59:41] [START   ] worker=w-daemon2 pid=10153 mode=daemon restarts=0
-[2026-11-23 16:59:42] [STATUS  ] SIGUSR1 status report (3 tracked workers)
-[2026-11-23 16:59:42] [STATUS  ]   worker=w-daemon1 pid=10151 state=RUNNING mode=daemon restarts=0/3
-[2026-11-23 16:59:42] [STATUS  ]   worker=w-normal pid=10152 state=RUNNING mode=normal restarts=0/3
-[2026-11-23 16:59:42] [STATUS  ]   worker=w-daemon2 pid=10153 state=RUNNING mode=daemon restarts=0/3
-[2026-11-23 16:59:43] [CHECK   ] periodic check complete: 3/3 workers running
-[2026-11-23 16:59:43] [EXIT    ] worker=w-normal pid=10152 exited normally (code=0)
-[2026-11-23 16:59:44] [WARN    ] worker=w-daemon1 pid=10151 killed by signal 9
-[2026-11-23 16:59:44] [RESTART ] worker=w-daemon1 attempt=1/3
-[2026-11-23 16:59:44] [START   ] worker=w-daemon1 pid=10204 mode=daemon restarts=1
-[2026-11-23 16:59:45] [CHECK   ] periodic check complete: 2/3 workers running
-[2026-11-23 16:59:45] [SHUTDOWN] received signal 15, starting graceful shutdown
-[2026-11-23 16:59:45] [SHUTDOWN] sending SIGTERM to active workers (timeout=3s)
-[2026-11-23 16:59:45] [EXIT    ] worker=w-daemon1 pid=10204 terminated during shutdown
-[2026-11-23 16:59:45] [EXIT    ] worker=w-daemon2 pid=10153 terminated during shutdown
-[2026-11-23 16:59:45] [SHUTDOWN] all child processes stopped and reaped
-[2026-11-23 16:59:45] [EXIT    ] watchdog stopped cleanly
+[2026-11-27 17:07:08] [INIT    ] watchdog started (pid=1275, log=tests/sample_watchdog.log)
+[2026-11-27 17:07:08] [START   ] worker=w-daemon1 pid=1277 mode=daemon restarts=0
+[2026-11-27 17:07:08] [START   ] worker=w-normal pid=1278 mode=normal restarts=0
+[2026-11-27 17:07:08] [START   ] worker=w-daemon2 pid=1279 mode=daemon restarts=0
+[2026-11-27 17:07:09] [STATUS  ] SIGUSR1 status report (3 tracked workers)
+[2026-11-27 17:07:09] [STATUS  ]   worker=w-daemon1 pid=1277 state=RUNNING mode=daemon restarts=0/3
+[2026-11-27 17:07:09] [STATUS  ]   worker=w-normal pid=1278 state=RUNNING mode=normal restarts=0/3
+[2026-11-27 17:07:09] [STATUS  ]   worker=w-daemon2 pid=1279 state=RUNNING mode=daemon restarts=0/3
+[2026-11-27 17:07:10] [CHECK   ] periodic check complete: 3/3 workers running
+[2026-11-27 17:07:10] [EXIT    ] worker=w-normal pid=1278 exited normally (code=0)
+[2026-11-27 17:07:11] [WARN    ] worker=w-daemon1 pid=1277 killed by signal 9
+[2026-11-27 17:07:11] [RESTART ] worker=w-daemon1 attempt=1/3
+[2026-11-27 17:07:11] [START   ] worker=w-daemon1 pid=1286 mode=daemon restarts=1
+[2026-11-27 17:07:12] [CHECK   ] periodic check complete: 2/3 workers running
+[2026-11-27 17:07:12] [SHUTDOWN] received signal 15, starting graceful shutdown
+[2026-11-27 17:07:12] [SHUTDOWN] sending SIGTERM to active workers (timeout=3s)
+[2026-11-27 17:07:12] [EXIT    ] worker=w-daemon1 pid=1286 terminated during shutdown
+[2026-11-27 17:07:12] [EXIT    ] worker=w-daemon2 pid=1279 terminated during shutdown
+[2026-11-27 17:07:12] [SHUTDOWN] all child processes stopped and reaped
+[2026-11-27 17:07:12] [EXIT    ] watchdog stopped cleanly

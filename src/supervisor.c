@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "supervisor.h"
+#include "signals.h"
 #include "log_io.h"
 
 #include <errno.h>
@@ -23,14 +24,49 @@ static ChildProcess *find_by_pid(pid_t pid) {
     return NULL;
 }
 
-static int spawn_child(ChildProcess *child) {
+static int spawn_child(ChildProcess *child, int restarting) {
+    sigset_t stop_signals, saved, pending;
+    sigemptyset(&stop_signals);
+    sigaddset(&stop_signals, SIGINT);
+    sigaddset(&stop_signals, SIGTERM);
+    if (sigprocmask(SIG_BLOCK, &stop_signals, &saved) == -1) {
+        log_write("ERROR", "cannot block shutdown signals: %s", strerror(errno));
+        return -1;
+    }
+
+    /* Treat each launch as one decision relative to the shutdown handler. */
+    if (sigpending(&pending) == -1) {
+        log_write("ERROR", "cannot read pending signals: %s", strerror(errno));
+        sigprocmask(SIG_SETMASK, &saved, NULL);
+        return -1;
+    }
+    if (g_shutdown_flag || sigismember(&pending, SIGINT) || sigismember(&pending, SIGTERM)) {
+        child->state = PROC_TERMINATED;
+        sigprocmask(SIG_SETMASK, &saved, NULL);
+        return 0;
+    }
+
+    if (restarting) {
+        child->restart_count++;
+        log_write("RESTART", "worker=%s attempt=%d/%d",
+                  child->name, child->restart_count, MAX_RESTARTS);
+    }
     pid_t pid = fork();
     if (pid < 0) {
         log_write("ERROR", "fork failed for %s: %s", child->name, strerror(errno));
+        sigprocmask(SIG_SETMASK, &saved, NULL);
         return -1;
     }
 
     if (pid == 0) {
+        struct sigaction action = {0};
+        action.sa_handler = SIG_DFL;
+        sigemptyset(&action.sa_mask);
+        if (sigaction(SIGTERM, &action, NULL) == -1 ||
+            sigaction(SIGINT, &action, NULL) == -1 ||
+            sigprocmask(SIG_SETMASK, &saved, NULL) == -1) {
+            _exit(127);
+        }
         if (child->arg[0] != '\0') {
             execl(WORKER_PATH, WORKER_PATH, child->name, child->mode, child->arg, (char *)NULL);
         } else {
@@ -46,7 +82,8 @@ static int spawn_child(ChildProcess *child) {
 
     log_write("START", "worker=%s pid=%d mode=%s restarts=%d",
               child->name, (int)pid, child->mode, child->restart_count);
-    return 0;
+    sigprocmask(SIG_SETMASK, &saved, NULL);
+    return 1;
 }
 
 void supervisor_init(void) {
@@ -84,7 +121,10 @@ int supervisor_register(const char *name, const char *mode, const char *arg) {
 int supervisor_start_all(void) {
     int started = 0;
     for (int i = 0; i < g_child_count; i++) {
-        if (spawn_child(&g_children[i]) == 0) {
+        if (g_shutdown_flag) {
+            break;
+        }
+        if (spawn_child(&g_children[i], 0) > 0) {
             started++;
         }
     }
@@ -103,7 +143,7 @@ void supervisor_handle_children(int allow_restart) {
 
         c->pid = -1;
 
-        if (!allow_restart) {
+        if (!allow_restart || g_shutdown_flag) {
             c->state = PROC_TERMINATED;
             log_write("EXIT", "worker=%s pid=%d terminated during shutdown",
                       c->name, (int)pid);
@@ -129,10 +169,7 @@ void supervisor_handle_children(int allow_restart) {
         }
 
         if (c->restart_count < MAX_RESTARTS) {
-            c->restart_count++;
-            log_write("RESTART", "worker=%s attempt=%d/%d",
-                      c->name, c->restart_count, MAX_RESTARTS);
-            if (spawn_child(c) != 0) {
+            if (spawn_child(c, 1) < 0) {
                 c->state = PROC_STOPPED_LIMIT;
             }
         } else {
