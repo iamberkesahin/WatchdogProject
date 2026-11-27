@@ -38,3 +38,32 @@ WatchdogProject/
 │   └── sample_watchdog.log
 └── docs/
     └── REPORT.pdf
+```
+
+## Build and Run
+
+Requires Linux or WSL with `gcc` and `make`.
+
+```bash
+make
+./watchdog
+```
+
+By default, `./watchdog` starts three workers (`worker-1` daemon, `worker-2` normal 8s, `worker-3` daemon) and writes logs to `watchdog.log`.
+
+## Manual Testing
+
+From a second terminal, using the PID printed by `./watchdog`:
+
+```bash
+kill -SIGUSR1 <WATCHDOG_PID>   # Write status report to watchdog.log
+kill -SIGKILL <WORKER_PID>     # Simulate unexpected termination
+kill -SIGTERM <WATCHDOG_PID>   # Trigger graceful shutdown
+```
+
+## Automated Tests and Clean
+
+```bash
+make test
+make clean
+```

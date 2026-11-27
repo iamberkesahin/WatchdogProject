@@ -20,6 +20,7 @@ worker: $(WORKER_SRC)
 
 test: all
 	bash tests/test_scenarios.sh
+	python3 tests/test_shutdown_overlap.py
 
 clean:
 	rm -f $(WATCHDOG_OBJS) watchdog worker *.log
